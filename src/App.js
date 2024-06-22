@@ -1,36 +1,41 @@
-import { Alchemy, Network } from 'alchemy-sdk';
-import { useEffect, useState } from 'react';
-
+import { Alchemy, Network, Utils } from "alchemy-sdk";
+import { useState } from "react";
 import './App.css';
 
-// Refer to the README doc for more information about using API
-// keys in client-side code. You should never do this in production
-// level code.
 const settings = {
   apiKey: process.env.REACT_APP_ALCHEMY_API_KEY,
   network: Network.ETH_MAINNET,
 };
 
-
-// In this week's lessons we used ethers.js. Here we are using the
-// Alchemy SDK is an umbrella library with several different packages.
-//
-// You can read more about the packages here:
-//   https://docs.alchemy.com/reference/alchemy-sdk-api-surface-overview#api-surface
 const alchemy = new Alchemy(settings);
 
 function App() {
-  const [blockNumber, setBlockNumber] = useState();
+  const [address, setAddress] = useState("");
+  const [addressBalance, setAddressBalance] = useState(null);
 
-  useEffect(() => {
-    async function getBlockNumber() {
-      setBlockNumber(await alchemy.core.getBlockNumber());
-    }
+  const onInputChange = (e) => {
+    setAddress(e.target.value);
+  };
 
-    getBlockNumber();
-  });
+  const getBalance = async () => {
+    const response = await alchemy.core.getBalance(address);
+    setAddressBalance(Utils.formatEther(response.toString()));
+  };
 
-  return <div className="App">Block Number: {blockNumber}</div>;
+  return (
+    <div>
+      <div className="balance">
+        <h1>Get ETH Balance</h1>
+        <div>
+          <input type="text" onChange={onInputChange} />
+        </div>
+        <div className="btn">
+          <button className="button-20" onClick={getBalance}>Get Balance</button>
+          {addressBalance && <p>{addressBalance} ETH</p>}
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default App;
